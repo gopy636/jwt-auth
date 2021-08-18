@@ -58,9 +58,8 @@ class LoginAPI(APIView):
             data = request.data
             serializer = LoginSerializers(data=data)
             if serializer.is_valid():
-                email = serializer.data["email"]
-                password = serializer.data["password"]
-                print(email,password)
+                email = serializer.data.get("email")
+                password = serializer.data.get("password")
                 cust_obj = CustomUser.objects.filter(email=email).first()
                 print(cust_obj)
                 if cust_obj is None:
@@ -68,6 +67,7 @@ class LoginAPI(APIView):
                 if not cust_obj.is_verified:
                     return Response({"status":400, "result":"Email not verified. Check your mail"})
                 user = authenticate(email=email, password=password)
+                print(user)
                 jwt_token = RefreshToken.for_user(user)
                 return Response({"status":200, "result":"Login successfully", "token":str(jwt_token.access_token)})
             return Response({"status":400, "error":serializer.errors})
